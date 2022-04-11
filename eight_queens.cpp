@@ -1,8 +1,10 @@
+// Eight Queens problem solver
+// 1: Queen / 0: Nothing
+// User choose the place of queens in first column
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 #include <stack>
-#include <cmath>
 #include <windows.h>
 
 using namespace std;
@@ -88,7 +90,7 @@ string get_input(const string line, bool int_only, int min, int max){
 }
 
 // program info
-string setup(){
+void program_info(){
 	color_str("info", "====================Eight Queens=====================",true);
 	color_str("normal", "> No two queens share the same row/column/diagonal", true);
 	color_str("normal", "> User choose the column of 1st row to place queen", true);
@@ -97,82 +99,73 @@ string setup(){
 	color_str("info", "\n> creator: zardforever", true);
     color_str("info", "=====================================================", true);
 	color_str("info", "\n========Choose Queen's Column Position========", true);
-	string result=get_input("Queen Column[1~8]: ", true, 1, 8);
-	return result;
+	return;
 }
 
-// check if a grid is valid for placing a queen
-bool grid_good(vector<vector<char>> table, int row, int col){
-	cout<<"GRID: "<<row<<"/"<<col<<endl;
-	// horizontal
-	for(int i=0;i<table.size();i++){
-		if(table[row][i]=='Q')return false;
-	}
-	// vertical
-	for(int i=0;i<table.size();i++){
-		if(table[i][col]=='Q')return false;
-	}
-	// diagonal
-	for(int i=0;i<table.size();i++){
-		for(int j=0;j<table.size();j++){
-			if(table[i][j]=='Q'){
-				cout<<"AAA"<<endl;
-				cout<<i<<"/"<<j<<" "<<row<<"/"<<col<<endl;
-				if(abs(row-i)==abs(col-j)){
-					return false;
-				}
-				else;
-			}
-			else;
-		}
-	}
-	return true;
-}
-
-// prnt list func
-void print_result(vector<vector<char>> table){
+// print list func
+void print_result(vector<vector<int>> q_vec){
 	color_str("info", "=======Eight Queens Result========",true);
 	cout<<"   ";
-	for(int i=0;i<table.size();i++){
+	for(int i=0;i<q_vec.size();i++){
 		color_str("number", to_string(i+1)+" ", false);
 	}
 	color_str("number", "\n====", false);
-	for(int i=0;i<table.size();i++){
+	for(int i=0;i<q_vec.size();i++){
 		color_str("number", "==", false);
 	}
 	cout<<endl;
-	for(int i=0;i<table.size();i++){
+	for(int i=0;i<q_vec.size();i++){
 		color_str("number", to_string(i+1)+"| ", false);
-		for(int j=0;j<table.size();j++){
-			if(table[i][j]=='Q'&&i==0)color_char("user_queen", table[i][j], false);
-			else if(table[i][j]=='Q')color_char("queen", table[i][j],false);
-			else color_char("normal", table[i][j], false);
+		for(int j=0;j<q_vec.size();j++){
+			if(q_vec[i][j]==1&&i==0)color_char("user_queen", 'Q', false);
+			else if(q_vec[i][j]==1)color_char("queen", 'Q',false);
+			else color_char("normal", '-', false);
 			cout<<" ";
 		}
 		color_str("number", "|\n", false);
 	}
 	color_str("number", "====", false);
-	for(int i=0;i<table.size();i++){
+	for(int i=0;i<q_vec.size();i++){
 		color_str("number", "==", false);
 	}
 	color_str("info", "\n==================================",true);
 }
 
-// stack method
-void stack_m(vector<vector<char>>& table, int queen_col){
+// queen okay or not to place specific row & color
+bool q_safe(vector<vector<int>> q_vec, int q_row, int q_col){
+	// horizontal
+	for(int col=0;col<q_vec.size();col++){
+		if(q_vec[q_row][col]==1)return false;
+	}
+	// vertical
+	for(int row=0;row<q_vec.size();row++){
+		if(q_vec[row][q_col]==1)return false;
+	}
+	// diagonal
+	for(int row=0;row<q_vec.size();row++){
+		for(int col=0;col<q_vec.size();col++){
+			if(q_vec[row][col]==1){ // exist a queen
+				if(abs(q_row-row)==abs(q_col-col))return false; // check if existed queen is at diagonal direction
+			}
+		}
+	}
+	return true;
+}
+
+// queen solver
+void q_solve(vector<vector<int>> q_vec, int col){
 	stack<int> st;
-	st.push(queen_col);
+	st.push(col);
 	int curr_row=1, curr_col=0;
-	while(curr_row<table.size()){
-		if(curr_col>=table.size()){
+	while(curr_row<q_vec.size()){
+		if(curr_col>=q_vec.size()){
 			curr_row=curr_row-1;
-			table[curr_row][st.top()]='-';
+			q_vec[curr_row][st.top()]=0;
 			curr_col=st.top()+1;
 			st.pop();
 		}
-		else if(grid_good(table, curr_row, curr_col)){
-			print_result(table);
-			table[curr_row][curr_col]='Q';
+		else if(q_safe(q_vec, curr_row, curr_col)){
+			q_vec[curr_row][curr_col]=1;
 			st.push(curr_col);
 			curr_row=curr_row+1;
 			curr_col=0;
@@ -181,22 +174,22 @@ void stack_m(vector<vector<char>>& table, int queen_col){
 			curr_col=curr_col+1;
 		}
 	}
-	print_result(table);
+	print_result(q_vec);
 	return;
 }
 
-
-
-int main(){	
+int main(){
 	bool again=true;
 	while(again){
-		int col=stoi(setup())-1;
+		program_info();
+		vector<vector<int>> q_vec(8, vector<int>(8, 0));
+		int q_col=stoi(get_input("Queen Column[1~8]: ", true, 1, 8))-1;
 		system("cls");
-		vector<vector<char>> table(8, vector<char>(8, '-'));
-		table[0][col]='Q';
-		stack_m(table, col);
-		again=yes_or_not("Do you want to continue?? [y/n] ");
+		q_vec[0][q_col]=1;
+		q_solve(q_vec, q_col);
+		again=yes_or_not("Do you want to play again?? [y/n] ");
 		system("cls");
 	}
+	
 	return 0;
 }
