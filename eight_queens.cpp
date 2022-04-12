@@ -180,8 +180,9 @@ int main(){
 	bool again=true;
 	while(again){
 		program_info();
-		vector<vector<int>> q_vec(8, vector<int>(8, 0)); // queen place check
-		vector<vector<int>> already_chk(8, vector<int>(8, false)); // already check place 
+		int q_vec_size=stoi(get_input("Queen Counts[1~9] ", true, 1, 9)); // setup how the N-queen's N is
+		vector<vector<int>> q_vec(q_vec_size, vector<int>(q_vec_size, 0)); // queen place check
+		vector<vector<int>> already_chk(q_vec_size, vector<int>(q_vec_size, false)); // already check place 
 		int q_col=stoi(get_input("Queen Column[1~8]: ", true, 1, 8))-1; // user place first queen column
 		ans_count=0; // reinitialize answer counter value
 		system("cls");
