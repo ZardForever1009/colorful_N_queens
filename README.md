@@ -5,4 +5,4 @@
 
 ![image](https://user-images.githubusercontent.com/87600155/162858699-b63f6ef9-fecd-4d35-a160-a1260224fe3b.png)
 
-# executue file link: https://github.com/ZardForever1009/colorful_N_queens/releases/tag/v1.0
+exe file link: https://github.com/ZardForever1009/colorful_N_queens/releases/tag/v1.0
