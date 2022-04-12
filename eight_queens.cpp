@@ -1,4 +1,4 @@
-// Eight Queens problem solver
+// N Queens problem solver
 // 1: Queen / 0: Nothing
 // User choose the place of queens in first column
 #include <iostream>
@@ -160,7 +160,7 @@ bool q_safe(vector<vector<int>> q_vec, int q_row, int q_col){
 }
 
 // queen solver
-void q_solve(vector<vector<int>>& q_vec, vector<vector<int>>& already_chk, int row){
+void q_solve(vector<vector<int>>& q_vec, int row){
 	if(row==q_vec.size()){  // reach the terminated condition
 		ans_count++;
 		print_result(q_vec);
@@ -169,11 +169,11 @@ void q_solve(vector<vector<int>>& q_vec, vector<vector<int>>& already_chk, int r
 	for(int col=0;col<q_vec.size();col++){ // check every column
 		if(q_safe(q_vec, row, col)){
 			q_vec[row][col]=1; // update value to 1 
-			already_chk[row][col]=true; // already check 
-			q_solve(q_vec, already_chk, row+1); // move to next row see if any possiblity of Queen
+			q_solve(q_vec, row+1); // move to next row see if any possiblity of Queen
 		}
 		q_vec[row][col]=0; // set back to 0 for next column chk (OR the next chk will NOT pass)
 	}
+	return;
 }
 
 int main(){
@@ -182,15 +182,14 @@ int main(){
 		program_info();
 		int q_vec_size=stoi(get_input("Queen Counts[1~9] ", true, 1, 9)); // setup how the N-queen's N is
 		vector<vector<int>> q_vec(q_vec_size, vector<int>(q_vec_size, 0)); // queen place check
-		vector<vector<int>> already_chk(q_vec_size, vector<int>(q_vec_size, false)); // already check place 
-		int q_col=stoi(get_input("Queen Column[1~8]: ", true, 1, 8))-1; // user place first queen column
+	int q_col=stoi(get_input("Queen Column[1~"+to_string(q_vec_size)+"] ", true, 1, q_vec_size))-1; // user place first queen column
 		ans_count=0; // reinitialize answer counter value
 		system("cls");
 		color_str("info", "=======Eight Queens Result========",true);
-		if(q_col==-1)q_solve(q_vec, already_chk, 0); // sovle all solution
+		if(q_col==-1)q_solve(q_vec, 0); // sovle all solution
 		else{
 			q_vec[0][q_col]=1;
-			q_solve(q_vec, already_chk, 1);
+			q_solve(q_vec, 1);
 		}
 		color_str("info", "==================================",true);
 		color_str("result", "> Total soultion counts: ", false);
