@@ -9,6 +9,8 @@
 
 using namespace std;
 
+static int ans_count=0;
+
 // change color
 void change_color(WORD c){
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), c);
@@ -35,6 +37,8 @@ void color_char(string stats, char c, bool new_line){
 void color_str(string stats, string line, bool new_line){
 	if(stats=="info"||stats=="input")change_color(FOREGROUND_RED|FOREGROUND_GREEN);
 	else if(stats=="number")change_color(FOREGROUND_GREEN);
+	else if(stats=="result")change_color(FOREGROUND_BLUE|FOREGROUND_GREEN);
+	else if(stats=="ans_count")change_color(FOREGROUND_RED|FOREGROUND_INTENSITY);
 	else if(stats=="normal")change_color(7);
     else{                     
         change_color(FOREGROUND_RED);
@@ -71,6 +75,7 @@ string get_input(const string line, bool int_only, int min, int max){
 			color_str("normal", "failed: empty input\n", true);
 			goto ENTER;
 		}
+		if(input=="zardforever")return "0"; //little trick
 		if(int_only){
 			for(int i=0;i<input.size();i++){
 				if(!isdigit(input[i])){
@@ -104,7 +109,9 @@ void program_info(){
 
 // print list func
 void print_result(vector<vector<int>> q_vec){
-	color_str("info", "=======Eight Queens Result========",true);
+	color_str("result", "soluiton ", false);
+	color_str("ans_count", to_string(ans_count), false);
+	cout<<":"<<endl;
 	cout<<"   ";
 	for(int i=0;i<q_vec.size();i++){
 		color_str("number", to_string(i+1)+" ", false);
@@ -128,7 +135,7 @@ void print_result(vector<vector<int>> q_vec){
 	for(int i=0;i<q_vec.size();i++){
 		color_str("number", "==", false);
 	}
-	color_str("info", "\n==================================",true);
+	color_str("info", "\n----------------------------------", true);
 }
 
 // queen okay or not to place specific row & color
@@ -153,40 +160,40 @@ bool q_safe(vector<vector<int>> q_vec, int q_row, int q_col){
 }
 
 // queen solver
-void q_solve(vector<vector<int>> q_vec, int col){
-	stack<int> st;
-	st.push(col);
-	int curr_row=1, curr_col=0;
-	while(curr_row<q_vec.size()){
-		if(curr_col>=q_vec.size()){
-			curr_row=curr_row-1;
-			q_vec[curr_row][st.top()]=0;
-			curr_col=st.top()+1;
-			st.pop();
-		}
-		else if(q_safe(q_vec, curr_row, curr_col)){
-			q_vec[curr_row][curr_col]=1;
-			st.push(curr_col);
-			curr_row=curr_row+1;
-			curr_col=0;
-		}
-		else{ 
-			curr_col=curr_col+1;
-		}
+void q_solve(vector<vector<int>>& q_vec, vector<vector<int>>& already_chk, int row){
+	if(row==q_vec.size()){  // reach the terminated condition
+		ans_count++;
+		print_result(q_vec);
+		return;
 	}
-	print_result(q_vec);
-	return;
+	for(int col=0;col<q_vec.size();col++){ // check every column
+		if(q_safe(q_vec, row, col)){
+			q_vec[row][col]=1; // update value to 1 
+			already_chk[row][col]=true; // already check 
+			q_solve(q_vec, already_chk, row+1); // move to next row see if any possiblity of Queen
+		}
+		q_vec[row][col]=0; // set back to 0 for next column chk (OR the next chk will NOT pass)
+	}
 }
 
 int main(){
 	bool again=true;
 	while(again){
 		program_info();
-		vector<vector<int>> q_vec(8, vector<int>(8, 0));
-		int q_col=stoi(get_input("Queen Column[1~8]: ", true, 1, 8))-1;
+		vector<vector<int>> q_vec(8, vector<int>(8, 0)); // queen place check
+		vector<vector<int>> already_chk(8, vector<int>(8, false)); // already check place 
+		int q_col=stoi(get_input("Queen Column[1~8]: ", true, 1, 8))-1; // user place first queen column
+		ans_count=0; // reinitialize answer counter value
 		system("cls");
-		q_vec[0][q_col]=1;
-		q_solve(q_vec, q_col);
+		color_str("info", "=======Eight Queens Result========",true);
+		if(q_col==-1)q_solve(q_vec, already_chk, 0); // sovle all solution
+		else{
+			q_vec[0][q_col]=1;
+			q_solve(q_vec, already_chk, 1);
+		}
+		color_str("info", "==================================",true);
+		color_str("result", "> Total soultion counts: ", false);
+		color_str("ans_count", to_string(ans_count), true);
 		again=yes_or_not("Do you want to play again?? [y/n] ");
 		system("cls");
 	}
